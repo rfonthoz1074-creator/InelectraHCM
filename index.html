@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente HCM Inelectra</title>
+    <style>
+        :root { --principal: #1a237e; --usuario: #dcf8c6; --fondo_ws: #e5ddd5; --blanco: #ffffff; --texto-suave: #888; --venemergencia: #e30613; --odontologia: #00bcd4; --amp: #4caf50; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background-color: #f0f2f5; }
+        #chat-launcher-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; z-index: 1000; }
+        #chat-tooltip { background: var(--blanco); padding: 10px 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; margin-bottom: 12px; border: 1px solid #ddd; position: relative; animation: bounce 2s infinite; cursor: pointer; font-weight: 500; }
+        #chat-launcher { width: 75px; height: 75px; background: white; border-radius: 50%; cursor: pointer; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.3); border: 3px solid var(--principal); display: flex; justify-content: center; align-items: center; }
+        #chat-launcher img { width: 100%; height: 100%; object-fit: cover; }
+        #chat-container { display: none; width: 380px; max-width: 90vw; height: 650px; max-height: 85vh; background: var(--blanco); position: fixed; bottom: 20px; right: 20px; box-shadow: 0 12px 35px rgba(0,0,0,0.3); border-radius: 18px; flex-direction: column; overflow: hidden; z-index: 1001; }
+        #chat-header { background: var(--principal); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .header-info { display: flex; align-items: center; gap: 10px; }
+        .header-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid white; object-fit: cover; background: white; }
+        #chat-window { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background-color: var(--fondo_ws); }
+        .msg { max-width: 85%; padding: 12px; border-radius: 15px; font-size: 14px; line-height: 1.4; white-space: pre-line; }
+        .bot { background: var(--blanco); align-self: flex-start; border-bottom-left-radius: 2px; box-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+        .user { background: var(--usuario); align-self: flex-end; border-bottom-right-radius: 2px; font-weight: 500; }
+        #options-container { padding: 12px; display: flex; flex-wrap: wrap; gap: 6px; border-top: 1px solid #eee; background: #fff; }
+        .opt-btn { border: 1.5px solid var(--principal); background: white; color: var(--principal); padding: 8px 12px; border-radius: 18px; cursor: pointer; font-weight: bold; font-size: 11px; transition: 0.2s; }
+        .opt-btn:hover { background: var(--principal); color: white; }
+        .opt-ven { border-color: var(--venemergencia); color: var(--venemergencia); }
+        .opt-ven:hover { background: var(--venemergencia); color: white; }
+        .opt-dnt { border-color: var(--odontologia); color: var(--odontologia); }
+        .opt-dnt:hover { background: var(--odontologia); color: white; }
+        .opt-amp { border-color: var(--amp); color: var(--amp); }
+        .opt-amp:hover { background: var(--amp); color: white; }
+        #input-area { display: none; padding: 12px; border-top: 1px solid #eee; background: #fff; }
+        #user-name-input { flex: 1; border: 1px solid #ccc; padding: 10px; border-radius: 20px; outline: none; margin-right: 5px; }
+        #send-name-btn { background: var(--principal); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        .powered-by { font-size: 9px; text-align: center; color: var(--texto-suave); padding: 8px 0; background: #fff; border-top: 1px solid #f0f0f0; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+    </style>
+</head>
+<body>
+<div id="chat-launcher-container">
+    <div id="chat-tooltip" onclick="toggleChat()">¿Dudas con tu HCM? ¡Pregúntame!</div>
+    <div id="chat-launcher" onclick="toggleChat()"><img src="Ines.png" onerror="this.src='https://ui-avatars.com/api/?name=HCM&background=1a237e&color=fff'"></div>
+</div>
+<div id="chat-container">
+    <div id="chat-header">
+        <div class="header-info">
+            <img src="Ines.png" class="header-avatar" onerror="this.src='https://ui-avatars.com/api/?name=HCM&background=fff&color=1a237e'">
+            <span>Asistente HCM - Inelectra</span>
+        </div>
+        <span onclick="toggleChat()" style="cursor:pointer; font-size: 24px;">&times;</span>
+    </div>
+    <div id="chat-window"></div>
+    <div id="options-container"></div>
+    <div id="input-area">
+        <input type="text" id="user-name-input" placeholder="Nombre y Apellido...">
+        <button id="send-name-btn">Ok</button>
+    </div>
+    <div class="powered-by">POWERED BY <strong>GESTIÓN DEL TALENTO INELECTRA</strong></div>
+</div>
+<script>
+    const chatContainer = document.getElementById('chat-container');
+    const chatWindow = document.getElementById('chat-window');
+    const optionsContainer = document.getElementById('options-container');
+    const inputArea = document.getElementById('input-area');
+    const userNameInput = document.getElementById('user-name-input');
+    const sendNameBtn = document.getElementById('send-name-btn');
+    let nombreUsuario = "";
+    let chatIniciado = false;
+    const TEL_ZURAIMA = "584122307463";
+    const MAIL_ZURAIMA = "zuraima.medina@inelectra.com";
+    const TEL_VEN = "02128221250";
+    const TEL_DENTAL = "08007336638";
+    
+    const botTree = {
+        inicio: { texto: "¡Hola! Soy tu Asistente Virtual de HCM Inelectra.\n\nEstoy aquí para guiarte con tus beneficios de salud. ¿Me podrías indicar tu nombre y apellido para comenzar?", tipo: "nombre" },
+        menu_principal: {
+            texto: "Hola [nombre], ¿en qué área necesitas apoyo hoy?",
+            opciones: [
+                { texto: "🚑 Venemergencia", siguiente: "rama_ven", clase: "opt-ven" },
+                { texto: "🩺 Consultas AMP", siguiente: "rama_amp", clase: "opt-amp" },
+                { texto: "🤝 Aliados", accion: "ir_aliados" },
+                { texto: "🦷 Salud Bucal", siguiente: "rama_odonto", clase: "opt-dnt" },
+                { texto: "📊 Coberturas 2026", siguiente: "rama_hcm" },
+                { texto: "📝 Trámites", siguiente: "rama_tramites" }
+            ]
+        },
+        rama_ven: {
+            texto: "<b>Venemergencia (24/7):</b>\n• Telemedicina\n• Atención Domiciliaria\n• Ambulancia\n• Medicinas Agudas.",
+            opciones: [
+                { texto: "📞 LLAMAR CENTRAL", accion: "llamar_ven" },
+                { texto: "💊 Pedir Medicinas", siguiente: "ven_medicinas" },
+                { texto: "⬅️ Volver", siguiente: "menu_principal" }
+            ]
+        },
+        ven_medicinas: { 
+            texto: "<b>Para solicitar medicamentos, elige una opción:</b>", 
+            opciones: [
+                { texto: "📋 Procedimiento y Datos", siguiente: "procedimiento_medicinas" },
+                { texto: "📧 Enviar correo", accion: "mail_ven" },
+                { texto: "⬅️ Volver", siguiente: "rama_ven" }
+            ] 
+        },
+        procedimiento_medicinas: {
+            texto: "<b>Procedimiento de Entrega de Medicamentos:</b>\n\n1. Contacto: Llama al (0212) 822-12-50 o 313.55.50.\n2. Documentos: Ten a mano récipe e informe médico.\n3. Envío al correo opmedico@grupov.com.ve indicando:\n• Nombre del Contratante.\n• Nombre y CI del Titular.\n• Nombre y CI del Asegurado afectado.",
+            opciones: [
+                { texto: "📧 Enviar correo", accion: "mail_ven" },
+                { texto: "⬅️ Volver", siguiente: "ven_medicinas" }
+            ]
+        },
+        rama_amp: { texto: "<b>Consultas AMP:</b>\n1. Busca al médico en segurosvenezuela.com.\n2. Agenda cita.\n3. Pide clave a SOFI (Chat Bot).", opciones: [{ texto: "💬 Hablar con SOFI", accion: "sofi_wa" }, { texto: "⬅️ Volver", siguiente: "menu_principal" }] },
+        rama_odonto: {
+            texto: "<b>Master Dental (Casonita):</b>\n• 2 Limpiezas anuales.\n• 4 Resinas.\n• Extracciones/Cordales.\n• Emergencias 24h.",
+            opciones: [
+                { texto: "📋 Ver todos los servicios", siguiente: "detalle_odonto" },
+                { texto: "📞 LLAMAR 0800-DENTAL", accion: "llamar_dental" },
+                { texto: "⬅️ Volver", siguiente: "menu_principal" }
+            ]
+        },
+        detalle_odonto: {
+            texto: "<b>Detalle de Servicios Master Dental (ANUAL):</b>\n• Consultas a escala nacional.\n• Examen, historia clínica y diagnóstico.\n• 2 Limpiezas.\n• 2 Exodoncias simples y quirúrgicas.\n• 2 cordales.\n• 4 Operatorias (Resinas).\n• 1 Tratamiento de conducto.\n• Emergencias odontológicas.",
+            opciones: [{ texto: "⬅️ Volver", siguiente: "rama_odonto" }]
+        },
+        rama_hcm: { 
+            texto: "<b>Póliza Básica:</b>\n• Límite: $10.000\n• Deducible: $25\n• Reembolso: 95%\n• Maternidad: $3.000\n<hr style='border:none; border-top: 1px solid #ddd; margin: 8px 0;'><b>Póliza de Exceso:</b>\n• Límite: $10.000\n• Deducible: $10.000", 
+            opciones: [{ texto: "💰 Ver Costos", siguiente: "hcm_costos" }, { texto: "⬅️ Volver", siguiente: "menu_principal" }] 
+        },
+        hcm_costos: { texto: "<b>Primas Mensuales:</b>\n• Hijos < 23: $10,58\n• Hijos 24-30: $25,41\n• Padres < 70: $71,25\n• Padres 71-80: $92,66", opciones: [{ texto: "Ok", siguiente: "rama_hcm" }] },
+        rama_tramites: { texto: "<b>Gestiones HCM:</b>", opciones: [{ texto: "📥 Descargar Planillas", siguiente: "descargas" }, { texto: "🚨 Reportar Emergencia", siguiente: "emergencia" }, { texto: "💰 Reembolsos", siguiente: "reembolsos" }, { texto: "⬅️ Volver", siguiente: "menu_principal" }] },
+        descargas: { texto: "<b>Documentos disponibles:</b>", opciones: [{ texto: "📄 Formulario HCM", accion: "descargar_hcm" }, { texto: "📄 Planilla Reembolso", accion: "descargar_reembolso" }, { texto: "⬅️ Volver", siguiente: "rama_tramites" }] },
+        emergencia: { texto: "<b>¿Reportar Emergencia?</b>\nAcude a la clínica con tu CI. ¿Quieres avisar a Zuraima?", opciones: [{ texto: "📱 WhatsApp Zuraima", accion: "ir_ws" }, { texto: "Ok", siguiente: "rama_tramites" }] },
+        reembolsos: { texto: "<b>Proceso de Reembolso:</b>\nEnvía Facturas SENIAT e Informe a Zuraima. Pago en 20 días hábiles.", opciones: [{ texto: "📧 Enviar Correo", accion: "ir_mail" }, { texto: "Ok", siguiente: "rama_tramites" }] }
+    };
+
+    function toggleChat() {
+        if (chatContainer.style.display === "flex") { chatContainer.style.display = "none"; }
+        else {
+            chatContainer.style.display = "flex";
+            if (!chatIniciado) { setTimeout(() => { mostrarOpciones('inicio'); chatIniciado = true; }, 100); }
+        }
+    }
+
+    function mostrarMensaje(texto, tipo) {
+        const div = document.createElement('div');
+        div.classList.add('msg', tipo);
+        // innerHTML permite leer las etiquetas <b> y <hr>
+        div.innerHTML = texto.replace("[nombre]", `<strong>${nombreUsuario}</strong>`);
+        chatWindow.appendChild(div);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    function mostrarOpciones(paso) {
+        optionsContainer.innerHTML = "";
+        inputArea.style.display = "none";
+        const datos = botTree[paso];
+        mostrarMensaje(datos.texto, 'bot');
+        if (datos.tipo === "nombre") {
+            inputArea.style.display = "flex";
+            userNameInput.focus();
+            sendNameBtn.onclick = () => {
+                if (userNameInput.value.trim()) {
+                    nombreUsuario = userNameInput.value.trim();
+                    mostrarMensaje(nombreUsuario, 'user');
+                    inputArea.style.display = "none";
+                    setTimeout(() => mostrarOpciones('menu_principal'), 500);
+                }
+            };
+        } else if (datos.opciones) {
+            datos.opciones.forEach(opt => {
+                const b = document.createElement('button');
+                b.classList.add('opt-btn');
+                if(opt.clase) b.classList.add(opt.clase);
+                b.innerText = opt.texto;
+                b.onclick = () => {
+                    if (opt.accion) ejecutarAccion(opt.accion);
+                    else {
+                        mostrarMensaje(opt.texto, 'user');
+                        setTimeout(() => mostrarOpciones(opt.siguiente), 400);
+                    }
+                };
+                optionsContainer.appendChild(b);
+            });
+        }
+    }
+
+    function ejecutarAccion(accion) {
+        if (accion === "llamar_ven") window.location.href = `tel:${TEL_VEN}`;
+        if (accion === "llamar_dental") window.location.href = `tel:${TEL_DENTAL}`;
+        if (accion === "sofi_wa") window.open("https://wa.me/584123683576", "_blank");
+        if (accion === "ir_ws") window.open(`https://wa.me/${TEL_ZURAIMA}?text=Hola Zuraima, soy ${nombreUsuario}. Reporto una emergencia.`, "_blank");
+        if (accion === "ir_aliados") window.open("https://www.segurosvenezuela.com/aliados/", "_blank");
+        if (accion === "ir_mail" || accion === "mail_ven") {
+            const email = (accion === "ir_mail") ? MAIL_ZURAIMA : "opmedico@grupov.com.ve";
+            const subject = (accion === "ir_mail") ? `Reembolso - ${nombreUsuario}` : `Solicitud de Medicinas - ${nombreUsuario}`;
+            const link = document.createElement('a');
+            link.href = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
+            link.target = "_blank"; link.click();
+        }
+        if (accion === "descargar_hcm") window.open('documentos/formulario-hcm.pdf', '_blank');
+        if (accion === "descargar_reembolso") window.open('documentos/planilla-reembolso.pdf', '_blank');
+    }
+</script>
+</body>
+</html>
