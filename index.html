@@ -15,27 +15,24 @@
     <style>
         :root { --principal: #1a237e; --usuario: #dcf8c6; --fondo_ws: #e5ddd5; --blanco: #ffffff; --texto-suave: #888; --venemergencia: #e30613; --odontologia: #00bcd4; --amp: #4caf50; }
         
-        /* Ajuste para que se comporte como App nativa */
         body, html { 
             height: 100%; margin: 0; overflow: hidden; 
             background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Launcher (Tu diseño original) */
+        /* Launcher original */
         #chat-launcher-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; z-index: 1000; }
         #chat-tooltip { background: var(--blanco); padding: 10px 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; margin-bottom: 12px; border: 1px solid #ddd; position: relative; animation: bounce 2s infinite; cursor: pointer; font-weight: 500; }
         #chat-launcher { width: 75px; height: 75px; background: white; border-radius: 50%; cursor: pointer; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.3); border: 3px solid var(--principal); display: flex; justify-content: center; align-items: center; }
         #chat-launcher img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Contenedor modo App (Ocupa toda la pantalla al abrirse) */
+        /* Contenedor modo App */
         #chat-container { 
             display: none; width: 100%; height: 100%; background: var(--blanco); 
-            position: fixed; top: 0; left: 0; box-shadow: none; border-radius: 0; 
-            flex-direction: column; overflow: hidden; z-index: 1001; 
+            position: fixed; top: 0; left: 0; flex-direction: column; overflow: hidden; z-index: 1001; 
         }
 
-        /* Ajuste responsivo para Desktop para que no se vea gigante */
         @media (min-width: 600px) {
             #chat-container { width: 400px; height: 90vh; left: auto; right: 20px; bottom: 20px; top: auto; border-radius: 18px; box-shadow: 0 12px 35px rgba(0,0,0,0.3); }
         }
@@ -48,9 +45,16 @@
         .header-info { display: flex; align-items: center; gap: 10px; }
         .header-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid white; object-fit: cover; background: white; }
         
-        #chat-window { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background-color: var(--fondo_ws); }
-        .msg { max-width: 85%; padding: 12px; border-radius: 15px; font-size: 14px; line-height: 1.4; white-space: pre-line; }
-        .bot { background: var(--blanco); align-self: flex-start; border-bottom-left-radius: 2px; box-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+        #chat-window { 
+            flex: 1; padding: 15px; overflow-y: auto; 
+            display: flex; flex-direction: column; gap: 12px; 
+            background-color: var(--fondo_ws);
+            scroll-behavior: smooth; /* Asegura suavidad nativa */
+            padding-bottom: 30px; /* Espacio extra al final */
+        }
+
+        .msg { max-width: 85%; padding: 12px; border-radius: 15px; font-size: 14px; line-height: 1.4; white-space: pre-line; box-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+        .bot { background: var(--blanco); align-self: flex-start; border-bottom-left-radius: 2px; }
         .user { background: var(--usuario); align-self: flex-end; border-bottom-right-radius: 2px; font-weight: 500; }
         
         #options-container { padding: 12px; display: flex; flex-wrap: wrap; gap: 6px; border-top: 1px solid #eee; background: #fff; justify-content: center; padding-bottom: env(safe-area-inset-bottom, 12px); }
@@ -183,7 +187,9 @@
         div.classList.add('msg', tipo);
         div.innerHTML = texto.replace("[nombre]", `<strong>${nombreUsuario}</strong>`);
         chatWindow.appendChild(div);
-        chatWindow.scrollTop = chatWindow.scrollHeight;
+        
+        // AUTO-SCROLL SUAVE: Mueve la pantalla al final de los mensajes
+        chatWindow.scrollTo({ top: chatWindow.scrollHeight, behavior: 'smooth' });
     }
 
     function mostrarOpciones(paso) {
@@ -229,12 +235,20 @@
         if (accion === "ir_mail" || accion === "mail_ven") {
             const email = (accion === "ir_mail") ? MAIL_ZURAIMA : "opmedico@grupov.com.ve";
             const subject = (accion === "ir_mail") ? `Reembolso - ${nombreUsuario}` : `Solicitud de Medicinas - ${nombreUsuario}`;
-            const link = document.createElement('a');
-            link.href = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
-            link.target = "_blank"; link.click();
+            window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
         }
-        if (accion === "descargar_hcm") window.open('documentos/formulario-hcm.pdf', '_blank');
-        if (accion === "descargar_reembolso") window.open('documentos/planilla-reembolso.pdf', '_blank');
+        
+        // MANEJO DE DESCARGAS (Busca en la carpeta /documentos)
+        if (accion === "descargar_hcm" || accion === "descargar_reembolso") {
+            const file = (accion === "descargar_hcm") ? 'documentos/formulario-hcm.pdf' : 'documentos/planilla-reembolso.pdf';
+            const link = document.createElement('a');
+            link.href = file;
+            link.target = '_blank';
+            link.download = file.split('/').pop();
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
     }
 </script>
 </body>
