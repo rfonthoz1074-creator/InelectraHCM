@@ -2,44 +2,81 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- Configuración para App Nativa (PWA) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1a237e">
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Asistente HCM","short_name":"HCM","display":"standalone","background_color":"#1a237e","theme_color":"#1a237e"}'>
+
     <title>Asistente HCM Inelectra</title>
     <style>
         :root { --principal: #1a237e; --usuario: #dcf8c6; --fondo_ws: #e5ddd5; --blanco: #ffffff; --texto-suave: #888; --venemergencia: #e30613; --odontologia: #00bcd4; --amp: #4caf50; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; background-color: #f0f2f5; }
+        
+        /* Ajuste para que se comporte como App nativa */
+        body, html { 
+            height: 100%; margin: 0; overflow: hidden; 
+            background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Launcher (Tu diseño original) */
         #chat-launcher-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; z-index: 1000; }
         #chat-tooltip { background: var(--blanco); padding: 10px 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; margin-bottom: 12px; border: 1px solid #ddd; position: relative; animation: bounce 2s infinite; cursor: pointer; font-weight: 500; }
         #chat-launcher { width: 75px; height: 75px; background: white; border-radius: 50%; cursor: pointer; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.3); border: 3px solid var(--principal); display: flex; justify-content: center; align-items: center; }
         #chat-launcher img { width: 100%; height: 100%; object-fit: cover; }
-        #chat-container { display: none; width: 380px; max-width: 90vw; height: 650px; max-height: 85vh; background: var(--blanco); position: fixed; bottom: 20px; right: 20px; box-shadow: 0 12px 35px rgba(0,0,0,0.3); border-radius: 18px; flex-direction: column; overflow: hidden; z-index: 1001; }
-        #chat-header { background: var(--principal); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+
+        /* Contenedor modo App (Ocupa toda la pantalla al abrirse) */
+        #chat-container { 
+            display: none; width: 100%; height: 100%; background: var(--blanco); 
+            position: fixed; top: 0; left: 0; box-shadow: none; border-radius: 0; 
+            flex-direction: column; overflow: hidden; z-index: 1001; 
+        }
+
+        /* Ajuste responsivo para Desktop para que no se vea gigante */
+        @media (min-width: 600px) {
+            #chat-container { width: 400px; height: 90vh; left: auto; right: 20px; bottom: 20px; top: auto; border-radius: 18px; box-shadow: 0 12px 35px rgba(0,0,0,0.3); }
+        }
+
+        #chat-header { 
+            background: var(--principal); color: white; padding: 15px; font-weight: bold; 
+            display: flex; justify-content: space-between; align-items: center;
+            padding-top: env(safe-area-inset-top, 15px);
+        }
         .header-info { display: flex; align-items: center; gap: 10px; }
         .header-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid white; object-fit: cover; background: white; }
+        
         #chat-window { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background-color: var(--fondo_ws); }
         .msg { max-width: 85%; padding: 12px; border-radius: 15px; font-size: 14px; line-height: 1.4; white-space: pre-line; }
         .bot { background: var(--blanco); align-self: flex-start; border-bottom-left-radius: 2px; box-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
         .user { background: var(--usuario); align-self: flex-end; border-bottom-right-radius: 2px; font-weight: 500; }
-        #options-container { padding: 12px; display: flex; flex-wrap: wrap; gap: 6px; border-top: 1px solid #eee; background: #fff; }
+        
+        #options-container { padding: 12px; display: flex; flex-wrap: wrap; gap: 6px; border-top: 1px solid #eee; background: #fff; justify-content: center; padding-bottom: env(safe-area-inset-bottom, 12px); }
         .opt-btn { border: 1.5px solid var(--principal); background: white; color: var(--principal); padding: 8px 12px; border-radius: 18px; cursor: pointer; font-weight: bold; font-size: 11px; transition: 0.2s; }
-        .opt-btn:hover { background: var(--principal); color: white; }
+        .opt-btn:active { background: var(--principal); color: white; transform: scale(0.95); }
         .opt-ven { border-color: var(--venemergencia); color: var(--venemergencia); }
-        .opt-ven:hover { background: var(--venemergencia); color: white; }
         .opt-dnt { border-color: var(--odontologia); color: var(--odontologia); }
-        .opt-dnt:hover { background: var(--odontologia); color: white; }
         .opt-amp { border-color: var(--amp); color: var(--amp); }
-        .opt-amp:hover { background: var(--amp); color: white; }
+
         #input-area { display: none; padding: 12px; border-top: 1px solid #eee; background: #fff; }
-        #user-name-input { flex: 1; border: 1px solid #ccc; padding: 10px; border-radius: 20px; outline: none; margin-right: 5px; }
+        #user-name-input { flex: 1; border: 1px solid #ccc; padding: 10px; border-radius: 20px; outline: none; margin-right: 5px; font-size: 16px; }
         #send-name-btn { background: var(--principal); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        
         .powered-by { font-size: 9px; text-align: center; color: var(--texto-suave); padding: 8px 0; background: #fff; border-top: 1px solid #f0f0f0; }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
     </style>
 </head>
 <body>
+
 <div id="chat-launcher-container">
     <div id="chat-tooltip" onclick="toggleChat()">¿Dudas con tu HCM? ¡Pregúntame!</div>
-    <div id="chat-launcher" onclick="toggleChat()"><img src="Ines.png" onerror="this.src='https://ui-avatars.com/api/?name=HCM&background=1a237e&color=fff'"></div>
+    <div id="chat-launcher" onclick="toggleChat()">
+        <img src="Ines.png" onerror="this.src='https://ui-avatars.com/api/?name=HCM&background=1a237e&color=fff'">
+    </div>
 </div>
+
 <div id="chat-container">
     <div id="chat-header">
         <div class="header-info">
@@ -56,6 +93,7 @@
     </div>
     <div class="powered-by">POWERED BY <strong>GESTIÓN DEL TALENTO INELECTRA</strong></div>
 </div>
+
 <script>
     const chatContainer = document.getElementById('chat-container');
     const chatWindow = document.getElementById('chat-window');
@@ -65,11 +103,12 @@
     const sendNameBtn = document.getElementById('send-name-btn');
     let nombreUsuario = "";
     let chatIniciado = false;
+
     const TEL_ZURAIMA = "584122307463";
     const MAIL_ZURAIMA = "zuraima.medina@inelectra.com";
     const TEL_VEN = "02128221250";
     const TEL_DENTAL = "08007336638";
-    
+
     const botTree = {
         inicio: { texto: "¡Hola! Soy tu Asistente Virtual de HCM Inelectra.\n\nEstoy aquí para guiarte con tus beneficios de salud. ¿Me podrías indicar tu nombre y apellido para comenzar?", tipo: "nombre" },
         menu_principal: {
@@ -131,8 +170,9 @@
     };
 
     function toggleChat() {
-        if (chatContainer.style.display === "flex") { chatContainer.style.display = "none"; }
-        else {
+        if (chatContainer.style.display === "flex") { 
+            chatContainer.style.display = "none"; 
+        } else {
             chatContainer.style.display = "flex";
             if (!chatIniciado) { setTimeout(() => { mostrarOpciones('inicio'); chatIniciado = true; }, 100); }
         }
@@ -141,7 +181,6 @@
     function mostrarMensaje(texto, tipo) {
         const div = document.createElement('div');
         div.classList.add('msg', tipo);
-        // innerHTML permite leer las etiquetas <b> y <hr>
         div.innerHTML = texto.replace("[nombre]", `<strong>${nombreUsuario}</strong>`);
         chatWindow.appendChild(div);
         chatWindow.scrollTop = chatWindow.scrollHeight;
