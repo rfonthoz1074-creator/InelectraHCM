@@ -4,19 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- Configuración para PWA (Instalación en página de inicio) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Inés HCM">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1a237e">
     
-    <!-- Enlace al Manifiesto (Define el logotipo y comportamiento al instalar) -->
-    <!-- CRITICAL: El archivo 'Ines.png' debe existir en el mismo directorio para que se vea el logo -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Asistente Inés HCM Inelectra","short_name":"INÉS","start_url":".","display":"standalone","background_color":"#1a237e","theme_color":"#1a237e","icons":[{"src":"Ines.png","sizes":"192x192","type":"image/png"},{"src":"Ines.png","sizes":"512x512","type":"image/png"}]}'>
-
-    <!-- Logotipos para Apple/iOS -->
     <link rel="apple-touch-icon" href="Ines.png">
+
+    <link rel="manifest" href='data:application/manifest+json,{
+        "name":"Asistente Inés HCM",
+        "short_name":"INÉS",
+        "display":"standalone",
+        "background_color":"#1a237e",
+        "theme_color":"#1a237e",
+        "icons": [
+            {
+                "src": "Ines.png",
+                "sizes": "192x192",
+                "type": "image/png"
+            },
+            {
+                "src": "Ines.png",
+                "sizes": "512x512",
+                "type": "image/png"
+            }
+        ]
+    }'>
 
     <title>Inés Asistente HCM Inelectra</title>
     <style>
@@ -24,7 +38,7 @@
         
         body, html { 
             height: 100%; margin: 0; overflow: hidden; 
-            background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, sans-serif;
+            background-color: #f0f2f5; font-family: "Segoe UI", Tahoma, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -99,12 +113,12 @@
 </div>
 
 <script>
-    const chatContainer = document.getElementById('chat-container');
-    const chatWindow = document.getElementById('chat-window');
-    const optionsContainer = document.getElementById('options-container');
-    const inputArea = document.getElementById('input-area');
-    const userNameInput = document.getElementById('user-name-input');
-    const sendNameBtn = document.getElementById('send-name-btn');
+    const chatContainer = document.getElementById("chat-container");
+    const chatWindow = document.getElementById("chat-window");
+    const optionsContainer = document.getElementById("options-container");
+    const inputArea = document.getElementById("input-area");
+    const userNameInput = document.getElementById("user-name-input");
+    const sendNameBtn = document.getElementById("send-name-btn");
     let nombreUsuario = "";
     let chatIniciado = false;
 
@@ -178,13 +192,13 @@
             chatContainer.style.display = "none"; 
         } else {
             chatContainer.style.display = "flex";
-            if (!chatIniciado) { setTimeout(() => { mostrarOpciones('inicio'); chatIniciado = true; }, 100); }
+            if (!chatIniciado) { setTimeout(() => { mostrarOpciones("inicio"); chatIniciado = true; }, 100); }
         }
     }
 
     function mostrarMensaje(texto, tipo) {
-        const div = document.createElement('div');
-        div.classList.add('msg', tipo);
+        const div = document.createElement("div");
+        div.classList.add("msg", tipo);
         div.innerHTML = texto.replace("[nombre]", `<strong>${nombreUsuario}</strong>`);
         chatWindow.appendChild(div);
         chatWindow.scrollTop = chatWindow.scrollHeight;
@@ -194,28 +208,28 @@
         optionsContainer.innerHTML = "";
         inputArea.style.display = "none";
         const datos = botTree[paso];
-        mostrarMensaje(datos.texto, 'bot');
+        mostrarMensaje(datos.texto, "bot");
         if (datos.tipo === "nombre") {
             inputArea.style.display = "flex";
             userNameInput.focus();
             sendNameBtn.onclick = () => {
                 if (userNameInput.value.trim()) {
                     nombreUsuario = userNameInput.value.trim();
-                    mostrarMensaje(nombreUsuario, 'user');
+                    mostrarMensaje(nombreUsuario, "user");
                     inputArea.style.display = "none";
-                    setTimeout(() => mostrarOpciones('menu_principal'), 500);
+                    setTimeout(() => mostrarOpciones("menu_principal"), 500);
                 }
             };
         } else if (datos.opciones) {
             datos.opciones.forEach(opt => {
-                const b = document.createElement('button');
-                b.classList.add('opt-btn');
+                const b = document.createElement("button");
+                b.classList.add("opt-btn");
                 if(opt.clase) b.classList.add(opt.clase);
                 b.innerText = opt.texto;
                 b.onclick = () => {
                     if (opt.accion) ejecutarAccion(opt.accion);
                     else {
-                        mostrarMensaje(opt.texto, 'user');
+                        mostrarMensaje(opt.texto, "user");
                         setTimeout(() => mostrarOpciones(opt.siguiente), 400);
                     }
                 };
@@ -233,19 +247,12 @@
         if (accion === "ir_mail" || accion === "mail_ven") {
             const email = (accion === "ir_mail") ? MAIL_ZURAIMA : "opmedico@grupov.com.ve";
             const subject = (accion === "ir_mail") ? `Reembolso - ${nombreUsuario}` : `Solicitud de Medicinas - ${nombreUsuario}`;
-            const link = document.createElement('a');
+            const link = document.createElement("a");
             link.href = `mailto:${email}?subject=${encodeURIComponent(subject)}`;
             link.target = "_blank"; link.click();
         }
-        if (accion === "descargar_hcm") window.open('documentos/formulario-hcm.pdf', '_blank');
-        if (accion === "descargar_reembolso") window.open('documentos/planilla-reembolso.pdf', '_blank');
-    }
-
-    // Registro de Service Worker para habilitar la funcionalidad de PWA completa
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi.addEventListener("fetch", (e) => {});').catch(err => console.log('SW error', err));
-      });
+        if (accion === "descargar_hcm") window.open("documentos/formulario-hcm.pdf", "_blank");
+        if (accion === "descargar_reembolso") window.open("documentos/planilla-reembolso.pdf", "_blank");
     }
 </script>
 </body>
