@@ -4,38 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- Configuración para App Nativa (PWA) -->
+    <!-- Configuración para PWA (Instalación en página de inicio) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Inés HCM">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1a237e">
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Asistente Inés","short_name":"INÉS","display":"standalone","background_color":"#1a237e","theme_color":"#1a237e"}'>
+    
+    <!-- Enlace al Manifiesto (Define el logotipo y comportamiento al instalar) -->
+    <!-- CRITICAL: El archivo 'Ines.png' debe existir en el mismo directorio para que se vea el logo -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Asistente Inés HCM Inelectra","short_name":"INÉS","start_url":".","display":"standalone","background_color":"#1a237e","theme_color":"#1a237e","icons":[{"src":"Ines.png","sizes":"192x192","type":"image/png"},{"src":"Ines.png","sizes":"512x512","type":"image/png"}]}'>
+
+    <!-- Logotipos para Apple/iOS -->
+    <link rel="apple-touch-icon" href="Ines.png">
 
     <title>Inés Asistente HCM Inelectra</title>
     <style>
         :root { --principal: #1a237e; --usuario: #dcf8c6; --fondo_ws: #e5ddd5; --blanco: #ffffff; --texto-suave: #888; --venemergencia: #e30613; --odontologia: #00bcd4; --amp: #4caf50; }
         
-        /* Ajuste para que se comporte como App nativa */
         body, html { 
             height: 100%; margin: 0; overflow: hidden; 
             background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Launcher (Tu diseño original) */
+        /* Launcher */
         #chat-launcher-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; z-index: 1000; }
         #chat-tooltip { background: var(--blanco); padding: 10px 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; margin-bottom: 12px; border: 1px solid #ddd; position: relative; animation: bounce 2s infinite; cursor: pointer; font-weight: 500; }
         #chat-launcher { width: 75px; height: 75px; background: white; border-radius: 50%; cursor: pointer; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.3); border: 3px solid var(--principal); display: flex; justify-content: center; align-items: center; }
         #chat-launcher img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Contenedor modo App (Ocupa toda la pantalla al abrirse) */
+        /* Contenedor modo App */
         #chat-container { 
             display: none; width: 100%; height: 100%; background: var(--blanco); 
-            position: fixed; top: 0; left: 0; box-shadow: none; border-radius: 0; 
-            flex-direction: column; overflow: hidden; z-index: 1001; 
+            position: fixed; top: 0; left: 0; flex-direction: column; overflow: hidden; z-index: 1001; 
         }
 
-        /* Ajuste responsivo para Desktop para que no se vea gigante */
         @media (min-width: 600px) {
             #chat-container { width: 400px; height: 90vh; left: auto; right: 20px; bottom: 20px; top: auto; border-radius: 18px; box-shadow: 0 12px 35px rgba(0,0,0,0.3); }
         }
@@ -236,6 +240,14 @@
         if (accion === "descargar_hcm") window.open('documentos/formulario-hcm.pdf', '_blank');
         if (accion === "descargar_reembolso") window.open('documentos/planilla-reembolso.pdf', '_blank');
     }
+
+    // Registro de Service Worker para habilitar la funcionalidad de PWA completa
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('data:text/javascript;base64,c2VsZi.addEventListener("fetch", (e) => {});').catch(err => console.log('SW error', err));
+      });
+    }
 </script>
 </body>
 </html>
+    
