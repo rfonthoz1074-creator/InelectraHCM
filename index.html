@@ -3,26 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#1a237e">
+    
     <link rel="manifest" href="manifest.json">
+
     <title>Inés Asistente HCM Inelectra</title>
     <style>
-        :root { --principal: #1a237e; --usuario: #dcf8c6; --fondo_ws: #e5ddd5; --blanco: #ffffff; --texto-suave: #888; --venemergencia: #e30613; --odontologia: #00bcd4; --amp: #4caf50; }
-        body, html { height: 100%; margin: 0; overflow: hidden; background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, sans-serif; -webkit-tap-highlight-color: transparent; }
+        :root { 
+            --principal: #1a237e; 
+            --usuario: #dcf8c6; 
+            --fondo_ws: #e5ddd5; 
+            --blanco: #ffffff; 
+            --texto-suave: #888; 
+            --venemergencia: #e30613; 
+            --odontologia: #00bcd4; 
+            --amp: #4caf50; 
+        }
         
+        body, html { 
+            height: 100%; margin: 0; overflow: hidden; 
+            background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         #chat-launcher-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; z-index: 1000; }
-        #chat-tooltip { background: var(--blanco); padding: 10px 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; margin-bottom: 12px; border: 1px solid #ddd; animation: bounce 2s infinite; cursor: pointer; font-weight: 500; }
+        #chat-tooltip { background: var(--blanco); padding: 10px 15px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; margin-bottom: 12px; border: 1px solid #ddd; position: relative; animation: bounce 2s infinite; cursor: pointer; font-weight: 500; }
         #chat-launcher { width: 75px; height: 75px; background: white; border-radius: 50%; cursor: pointer; overflow: hidden; box-shadow: 0 6px 20px rgba(0,0,0,0.3); border: 3px solid var(--principal); display: flex; justify-content: center; align-items: center; }
         #chat-launcher img { width: 100%; height: 100%; object-fit: cover; }
 
-        #chat-container { display: none; width: 100%; height: 100%; background: var(--blanco); position: fixed; top: 0; left: 0; flex-direction: column; overflow: hidden; z-index: 1001; }
-        @media (min-width: 600px) { #chat-container { width: 400px; height: 90vh; left: auto; right: 20px; bottom: 20px; top: auto; border-radius: 18px; box-shadow: 0 12px 35px rgba(0,0,0,0.3); } }
+        #chat-container { 
+            display: none; width: 100%; height: 100%; background: var(--blanco); 
+            position: fixed; top: 0; left: 0; box-shadow: none; border-radius: 0; 
+            flex-direction: column; overflow: hidden; z-index: 1001; 
+        }
 
-        #chat-header { background: var(--principal); color: white; padding: 15px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; padding-top: env(safe-area-inset-top, 15px); }
+        @media (min-width: 600px) {
+            #chat-container { width: 400px; height: 90vh; left: auto; right: 20px; bottom: 20px; top: auto; border-radius: 18px; box-shadow: 0 12px 35px rgba(0,0,0,0.3); }
+        }
+
+        #chat-header { 
+            background: var(--principal); color: white; padding: 15px; font-weight: bold; 
+            display: flex; justify-content: space-between; align-items: center;
+            padding-top: env(safe-area-inset-top, 15px);
+        }
         .header-info { display: flex; align-items: center; gap: 10px; }
-        .header-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid white; background: white; }
+        .header-avatar { width: 35px; height: 35px; border-radius: 50%; border: 1px solid white; object-fit: cover; background: white; }
         
         #chat-window { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background-color: var(--fondo_ws); }
         .msg { max-width: 85%; padding: 12px; border-radius: 15px; font-size: 14px; line-height: 1.4; white-space: pre-line; }
@@ -32,18 +61,21 @@
         #options-container { padding: 12px; display: flex; flex-wrap: wrap; gap: 6px; border-top: 1px solid #eee; background: #fff; justify-content: center; padding-bottom: env(safe-area-inset-bottom, 12px); }
         .opt-btn { border: 1.5px solid var(--principal); background: white; color: var(--principal); padding: 8px 12px; border-radius: 18px; cursor: pointer; font-weight: bold; font-size: 11px; transition: 0.2s; }
         .opt-btn:active { background: var(--principal); color: white; transform: scale(0.95); }
-        
-        /* Estilos Buscador Aliados */
-        .aliados-box { background: white; padding: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box; }
-        .aliados-select { width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; }
-        .btn-buscar { width: 100%; background: var(--principal); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .card-aliado { background: #f9f9f9; border-left: 4px solid var(--principal); padding: 10px; border-radius: 4px; margin-top: 8px; font-size: 13px; }
-        .card-aliado h4 { margin: 0 0 5px 0; color: var(--principal); }
-        .card-aliado a { color: #1a73e8; text-decoration: none; font-weight: bold; display: block; margin-top: 5px; }
+        .opt-ven { border-color: var(--venemergencia); color: var(--venemergencia); }
+        .opt-dnt { border-color: var(--odontologia); color: var(--odontologia); }
+        .opt-amp { border-color: var(--amp); color: var(--amp); }
+
+        .aliados-form { display: flex; flex-direction: column; gap: 8px; width: 100%; background: white; padding: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 10px; box-sizing: border-box; }
+        .aliados-select { padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; width: 100%; }
+        .aliados-btn-search { background: var(--principal); color: white; border: none; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .aliado-card { background: white; border-left: 4px solid var(--principal); padding: 10px; border-radius: 4px; margin-top: 8px; font-size: 13px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .aliado-card h4 { margin: 0 0 5px 0; color: var(--principal); }
+        .aliado-card a { color: #1a73e8; text-decoration: none; font-weight: bold; display: block; margin-top: 5px; }
 
         #input-area { display: none; padding: 12px; border-top: 1px solid #eee; background: #fff; }
         #user-name-input { flex: 1; border: 1px solid #ccc; padding: 10px; border-radius: 20px; outline: none; margin-right: 5px; font-size: 16px; }
         #send-name-btn { background: var(--principal); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        
         .powered-by { font-size: 9px; text-align: center; color: var(--texto-suave); padding: 8px 0; background: #fff; border-top: 1px solid #f0f0f0; }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
     </style>
@@ -63,11 +95,14 @@
             <img src="Ines.png" class="header-avatar" onerror="this.src='https://ui-avatars.com/api/?name=HCM&background=fff&color=1a237e'">
             <span>Inés Asistente HCM - Inelectra</span>
         </div>
-        <span onclick="toggleChat()" style="cursor:pointer; font-size: 24px;">&times;</span>
+        <span onclick="toggleChat()" style="cursor:pointer; font-size: 24px;">×</span>
     </div>
     <div id="chat-window"></div>
     <div id="options-container"></div>
-    <div id="input-area"><input type="text" id="user-name-input" placeholder="Nombre..."><button id="send-name-btn">Ok</button></div>
+    <div id="input-area">
+        <input type="text" id="user-name-input" placeholder="Nombre y Apellido...">
+        <button id="send-name-btn">Ok</button>
+    </div>
     <div class="powered-by">POWERED BY <strong>GESTIÓN DEL TALENTO INELECTRA</strong></div>
 </div>
 
@@ -78,37 +113,86 @@
     const inputArea = document.getElementById('input-area');
     const userNameInput = document.getElementById('user-name-input');
     const sendNameBtn = document.getElementById('send-name-btn');
-    
     let nombreUsuario = "";
     let chatIniciado = false;
-    let datosAliados = [];
 
-    // Cargar JSON
-    fetch('aliados.json')
-        .then(r => r.json())
-        .then(d => { datosAliados = d; })
-        .catch(e => console.error("Error cargando JSON", e));
+    // DATOS INTEGRADOS PARA EVITAR ERRORES DE CARGA OFFLINE O CORS
+    const aliadosData = [
+        { "estado": "Amazonas", "ciudad": "PUERTO AYACUCHO", "nombre": "CENTRO MEDICO Amazonas", "direccion": "Av Rómulo Gallegos, Puerto Ayacucho" },
+        { "estado": "Anzoátegui", "ciudad": "EL TIGRE", "nombre": "CENTRO CARDIOLOGICO DR PIMENTEL CA", "direccion": "Calle 6ta cruce con 2da carrera Norte" },
+        { "estado": "Anzoátegui", "ciudad": "PUERTO LA CRUZ", "nombre": "CENTRO CLINICO SANTA ANA", "direccion": "Av Principal, Urb Caribe, N 43" },
+        { "estado": "Anzoátegui", "ciudad": "LECHERIA", "nombre": "CENTRO DE ESPECIALIDADES ANZOATEGUI", "direccion": "Av. Principal de Lechería" },
+        { "estado": "Zulia", "ciudad": "MARACAIBO", "nombre": "HOSPITAL CLINICO", "direccion": "Av 15 Las Delicias, Urb La Trinidad" },
+        { "estado": "Zulia", "ciudad": "CIUDAD OJEDA", "nombre": "SERVICIO MEDICOS DEL ZULIA", "direccion": "Av 8 Prolongacion Calle Piar" },
+        { "estado": "Zulia", "ciudad": "VILLA DEL ROSARIO", "nombre": "LA FE ESPECIALIDADES MEDICAS", "direccion": "Av 22 Falcón Sector Casco Central" }
+        // Agrega aquí más si lo deseas, pero con estos el buscador ya FUNCIONARÁ.
+    ];
+
+    const TEL_ZURAIMA = "584122307463";
+    const MAIL_ZURAIMA = "zuraima.medina@inelectra.com";
+    const TEL_VEN = "02128221250";
+    const TEL_DENTAL = "08007336638";
 
     const botTree = {
-        inicio: { texto: "¡Hola! Soy Inés.\n\n¿Me podrías indicar tu nombre y apellido para comenzar?", tipo: "nombre" },
+        inicio: { texto: "¡Hola! Soy Inés.\n\nEstoy aquí para guiarte con tus beneficios de salud. ¿Me podrías indicar tu nombre y apellido para comenzar?", tipo: "nombre" },
         menu_principal: {
             texto: "Hola [nombre], ¿en qué área necesitas apoyo hoy?",
             opciones: [
-                { texto: "🚑 Venemergencia", siguiente: "rama_ven" },
-                { texto: "🩺 Consultas AMP", siguiente: "rama_amp" },
+                { texto: "🚑 Venemergencia", siguiente: "rama_ven", clase: "opt-ven" },
+                { texto: "🩺 Consultas AMP", siguiente: "rama_amp", clase: "opt-amp" },
                 { texto: "🤝 Aliados", siguiente: "rama_aliados" },
-                { texto: "🦷 Salud Bucal", siguiente: "rama_odonto" },
+                { texto: "🦷 Salud Bucal", siguiente: "rama_odonto", clase: "opt-dnt" },
                 { texto: "📊 Coberturas 2026", siguiente: "rama_hcm" },
                 { texto: "📝 Trámites", siguiente: "rama_tramites" }
             ]
         },
-        rama_aliados: { texto: "<b>Buscador de Aliados:</b>\nSelecciona ubicación para ver centros disponibles:", tipo: "buscador" }
-        // ... (Otras ramas se mantienen igual)
+        rama_aliados: {
+            texto: "<b>Red de Aliados a Nivel Nacional:</b>\nSelecciona ubicación para ver centros disponibles.",
+            tipo: "aliados_form"
+        },
+        rama_ven: {
+            texto: "<b>Venemergencia (24/7):</b>\n• Telemedicina\n• Atención Domiciliaria\n• Ambulancia.",
+            opciones: [
+                { texto: "📞 LLAMAR CENTRAL", accion: "llamar_ven" },
+                { texto: "💊 Pedir Medicinas", siguiente: "ven_medicinas" },
+                { texto: "⬅️ Volver", siguiente: "menu_principal" }
+            ]
+        },
+        ven_medicinas: { 
+            texto: "<b>Para solicitar medicamentos, elige una opción:</b>", 
+            opciones: [
+                { texto: "📋 Procedimiento", siguiente: "procedimiento_medicinas" },
+                { texto: "📧 Enviar correo", accion: "mail_ven" },
+                { texto: "⬅️ Volver", siguiente: "rama_ven" }
+            ] 
+        },
+        procedimiento_medicinas: {
+            texto: "<b>Entrega de Medicamentos:</b>\n1. Llama al (0212) 822-12-50.\n2. Ten récipe e informe médico.\n3. Envía a opmedico@grupov.com.ve.",
+            opciones: [{ texto: "⬅️ Volver", siguiente: "ven_medicinas" }]
+        },
+        rama_amp: { texto: "<b>Consultas AMP:</b>\n1. Busca al médico en segurosvenezuela.com.\n2. Pide clave a SOFI.", opciones: [{ texto: "💬 Hablar con SOFI", accion: "sofi_wa" }, { texto: "⬅️ Volver", siguiente: "menu_principal" }] },
+        rama_odonto: {
+            texto: "<b>Master Dental:</b>\n• 2 Limpiezas.\n• 4 Resinas.\n• Emergencias 24h.",
+            opciones: [
+                { texto: "📞 LLAMAR 0800-DENTAL", accion: "llamar_dental" },
+                { texto: "⬅️ Volver", siguiente: "menu_principal" }
+            ]
+        },
+        rama_hcm: { 
+            texto: "<b>Póliza Básica:</b>\n• Límite: $10.000\n• Deducible: $25\n• Reembolso: 95%", 
+            opciones: [{ texto: "💰 Ver Costos", siguiente: "hcm_costos" }, { texto: "⬅️ Volver", siguiente: "menu_principal" }] 
+        },
+        hcm_costos: { texto: "<b>Primas Mensuales:</b>\n• Hijos < 23: $10,58\n• Padres < 70: $71,25", opciones: [{ texto: "Ok", siguiente: "rama_hcm" }] },
+        rama_tramites: { texto: "<b>Gestiones HCM:</b>", opciones: [{ texto: "📥 Descargas", siguiente: "descargas" }, { texto: "🚨 Emergencia", siguiente: "emergencia" }, { texto: "⬅️ Volver", siguiente: "menu_principal" }] },
+        descargas: { texto: "<b>Documentos:</b>", opciones: [{ texto: "📄 Formulario HCM", accion: "descargar_hcm" }, { texto: "⬅️ Volver", siguiente: "rama_tramites" }] },
+        emergencia: { texto: "<b>¿Reportar Emergencia?</b>\nAcude con tu CI. ¿Quieres avisar a Zuraima?", opciones: [{ texto: "📱 WhatsApp Zuraima", accion: "ir_ws" }, { texto: "⬅️ Volver", siguiente: "rama_tramites" }] }
     };
 
     function toggleChat() {
         chatContainer.style.display = (chatContainer.style.display === "flex") ? "none" : "flex";
-        if (!chatIniciado) { mostrarOpciones('inicio'); chatIniciado = true; }
+        if (!chatIniciado && chatContainer.style.display === "flex") { 
+            setTimeout(() => { mostrarOpciones('inicio'); chatIniciado = true; }, 300); 
+        }
     }
 
     function mostrarMensaje(texto, tipo) {
@@ -123,11 +207,12 @@
     function mostrarOpciones(paso) {
         optionsContainer.innerHTML = "";
         inputArea.style.display = "none";
-        const d = botTree[paso] || { texto: "Opción no disponible", opciones: [{texto: "Volver", siguiente: "menu_principal"}] };
-        
-        mostrarMensaje(d.texto, 'bot');
+        const datos = botTree[paso];
+        if (!datos) return;
 
-        if (d.tipo === "nombre") {
+        mostrarMensaje(datos.texto, 'bot');
+
+        if (datos.tipo === "nombre") {
             inputArea.style.display = "flex";
             sendNameBtn.onclick = () => {
                 if (userNameInput.value.trim()) {
@@ -137,69 +222,91 @@
                     setTimeout(() => mostrarOpciones('menu_principal'), 500);
                 }
             };
-        } else if (d.tipo === "buscador") {
-            crearBuscador();
-        } else if (d.opciones) {
-            d.opciones.forEach(opt => {
+        } else if (datos.tipo === "aliados_form") {
+            generarMenuAliados();
+        } else if (datos.opciones) {
+            datos.opciones.forEach(opt => {
                 const b = document.createElement('button');
-                b.className = 'opt-btn';
+                b.classList.add('opt-btn');
+                if(opt.clase) b.classList.add(opt.clase);
                 b.innerText = opt.texto;
                 b.onclick = () => {
-                    mostrarMensaje(opt.texto, 'user');
-                    setTimeout(() => mostrarOpciones(opt.siguiente), 400);
+                    if (opt.accion) ejecutarAccion(opt.accion);
+                    else {
+                        mostrarMensaje(opt.texto, 'user');
+                        setTimeout(() => mostrarOpciones(opt.siguiente), 400);
+                    }
                 };
                 optionsContainer.appendChild(b);
             });
         }
     }
 
-    function crearBuscador() {
-        const box = document.createElement('div');
-        box.className = 'aliados-box';
+    function generarMenuAliados() {
+        const form = document.createElement('div');
+        form.className = 'aliados-form';
+
+        const estados = [...new Set(aliadosData.map(a => a.estado))].sort();
         
-        const estados = [...new Set(datosAliados.map(a => a.estado))].sort();
         const selEstado = document.createElement('select');
         selEstado.className = 'aliados-select';
-        selEstado.innerHTML = '<option value="">Selecciona Estado...</option>' + estados.map(e => `<option value="${e}">${e}</option>`).join('');
-        
+        selEstado.innerHTML = '<option value="">Selecciona Estado...</option>' + 
+            estados.map(e => `<option value="${e}">${e}</option>`).join('');
+
         const selCiudad = document.createElement('select');
         selCiudad.className = 'aliados-select';
         selCiudad.innerHTML = '<option value="">Selecciona Ciudad...</option>';
-        
+
         selEstado.onchange = () => {
-            const ciudades = [...new Set(datosAliados.filter(a => a.estado === selEstado.value).map(a => a.ciudad))].sort();
-            selCiudad.innerHTML = '<option value="">Selecciona Ciudad...</option>' + ciudades.map(c => `<option value="${c}">${c}</option>`).join('');
+            const ciudades = [...new Set(aliadosData.filter(a => a.estado === selEstado.value).map(a => a.ciudad))].sort();
+            selCiudad.innerHTML = '<option value="">Selecciona Ciudad...</option>' + 
+                ciudades.map(c => `<option value="${c}">${c}</option>`).join('');
         };
 
-        const btn = document.createElement('button');
-        btn.className = 'btn-buscar';
-        btn.innerText = "🔍 BUSCAR";
-        btn.onclick = () => {
-            const filtrados = datosAliados.filter(a => a.estado === selEstado.value && a.ciudad === selCiudad.value);
-            if(filtrados.length) {
-                mostrarMensaje(`Encontré ${filtrados.length} aliados:`, 'bot');
-                filtrados.forEach(a => {
-                    const card = `<div class="card-aliado">
-                        <h4>${a.nombre}</h4>
-                        <p>${a.direccion}</p>
-                        <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(a.nombre + ' ' + a.ciudad)}" target="_blank">📍 Ver en Google Maps</a>
+        const btnBuscar = document.createElement('button');
+        btnBuscar.className = 'aliados-btn-search';
+        btnBuscar.innerText = "🔍 BUSCAR ALIADOS";
+        btnBuscar.onclick = () => {
+            if (!selEstado.value || !selCiudad.value) return;
+            const res = aliadosData.filter(a => a.estado === selEstado.value && a.ciudad === selCiudad.value);
+            mostrarMensaje(`Aliados en ${selCiudad.value}:`, 'bot');
+            res.forEach(aliado => {
+                const card = `
+                    <div class="aliado-card">
+                        <h4>${aliado.nombre}</h4>
+                        <p>${aliado.direccion}</p>
+                        <a href="https://www.google.com/maps/search/${encodeURIComponent(aliado.nombre + ' ' + aliado.ciudad)}" target="_blank">📍 Ver en Mapa</a>
                     </div>`;
-                    mostrarMensaje(card, 'bot');
-                });
-            }
-            const bV = document.createElement('button');
-            bV.className = 'opt-btn'; bV.innerText = "⬅️ Volver al Menú";
-            bV.onclick = () => mostrarOpciones('menu_principal');
-            optionsContainer.innerHTML = ""; optionsContainer.appendChild(bV);
+                mostrarMensaje(card, 'bot');
+            });
+            
+            optionsContainer.innerHTML = "";
+            const bVolver = document.createElement('button');
+            bVolver.className = 'opt-btn';
+            bVolver.innerText = "⬅️ Volver al Menú";
+            bVolver.onclick = () => mostrarOpciones('menu_principal');
+            optionsContainer.appendChild(bVolver);
         };
 
-        box.appendChild(selEstado); box.appendChild(selCiudad); box.appendChild(btn);
-        chatWindow.appendChild(box);
+        form.appendChild(selEstado);
+        form.appendChild(selCiudad);
+        form.appendChild(btnBuscar);
+        chatWindow.appendChild(form);
         chatWindow.scrollTop = chatWindow.scrollHeight;
+
+        const bV = document.createElement('button');
+        bV.className = 'opt-btn'; bV.innerText = "⬅️ Volver";
+        bV.onclick = () => mostrarOpciones('menu_principal');
+        optionsContainer.appendChild(bV);
     }
 
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('data:application/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGU9Pnt9KTs=');
+    function ejecutarAccion(accion) {
+        if (accion === "llamar_ven") window.location.href = `tel:${TEL_VEN}`;
+        if (accion === "llamar_dental") window.location.href = `tel:${TEL_DENTAL}`;
+        if (accion === "sofi_wa") window.open("https://wa.me/584123683576", "_blank");
+        if (accion === "ir_ws") window.open(`https://wa.me/${TEL_ZURAIMA}?text=Hola Zuraima, soy ${nombreUsuario}. Reporto una emergencia.`, "_blank");
+        if (accion === "mail_ven") window.location.href = `mailto:opmedico@grupov.com.ve?subject=Solicitud Medicinas - ${nombreUsuario}`;
+        if (accion === "descargar_hcm") window.open('documentos/formulario-hcm.pdf', '_blank');
     }
 </script>
 </body>
