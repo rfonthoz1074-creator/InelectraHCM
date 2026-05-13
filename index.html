@@ -13,7 +13,16 @@
 
     <title>Inés Asistente HCM Inelectra</title>
     <style>
-        :root { --principal: #1a237e; --usuario: #dcf8c6; --fondo_ws: #e5ddd5; --blanco: #ffffff; --texto-suave: #888; --venemergencia: #e30613; --odontologia: #00bcd4; --amp: #4caf50; }
+        :root { 
+            --principal: #1a237e; 
+            --usuario: #dcf8c6; 
+            --fondo_ws: #e5ddd5; 
+            --blanco: #ffffff; 
+            --texto-suave: #888; 
+            --venemergencia: #e30613; 
+            --odontologia: #00bcd4; 
+            --amp: #4caf50; 
+        }
         
         body, html { 
             height: 100%; margin: 0; overflow: hidden; 
@@ -55,6 +64,14 @@
         .opt-ven { border-color: var(--venemergencia); color: var(--venemergencia); }
         .opt-dnt { border-color: var(--odontologia); color: var(--odontologia); }
         .opt-amp { border-color: var(--amp); color: var(--amp); }
+
+        /* Estilos para el formulario de Aliados */
+        .aliados-form { display: flex; flex-direction: column; gap: 8px; width: 100%; background: white; padding: 10px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 10px; }
+        .aliados-select { padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 14px; }
+        .aliados-btn-search { background: var(--principal); color: white; border: none; padding: 10px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        .aliado-card { background: white; border-left: 4px solid var(--principal); padding: 10px; border-radius: 4px; margin-top: 8px; font-size: 13px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .aliado-card h4 { margin: 0 0 5px 0; color: var(--principal); }
+        .aliado-card a { color: #1a73e8; text-decoration: none; font-weight: bold; display: block; margin-top: 5px; }
 
         #input-area { display: none; padding: 12px; border-top: 1px solid #eee; background: #fff; }
         #user-name-input { flex: 1; border: 1px solid #ccc; padding: 10px; border-radius: 20px; outline: none; margin-right: 5px; font-size: 16px; }
@@ -99,11 +116,18 @@
     const sendNameBtn = document.getElementById('send-name-btn');
     let nombreUsuario = "";
     let chatIniciado = false;
+    let aliadosData = [];
 
     const TEL_ZURAIMA = "584122307463";
     const MAIL_ZURAIMA = "zuraima.medina@inelectra.com";
     const TEL_VEN = "02128221250";
     const TEL_DENTAL = "08007336638";
+
+    // Cargar JSON de Aliados al iniciar
+    fetch('aliados.json')
+        .then(response => response.json())
+        .then(data => { aliadosData = data; })
+        .catch(err => console.warn("No se pudo cargar aliados.json localmente:", err));
 
     const botTree = {
         inicio: { texto: "¡Hola! Soy Inés.\n\nEstoy aquí para guiarte con tus beneficios de salud. ¿Me podrías indicar tu nombre y apellido para comenzar?", tipo: "nombre" },
@@ -112,11 +136,15 @@
             opciones: [
                 { texto: "🚑 Venemergencia", siguiente: "rama_ven", clase: "opt-ven" },
                 { texto: "🩺 Consultas AMP", siguiente: "rama_amp", clase: "opt-amp" },
-                { texto: "🤝 Aliados", accion: "ir_aliados" },
+                { texto: "🤝 Aliados", siguiente: "rama_aliados" },
                 { texto: "🦷 Salud Bucal", siguiente: "rama_odonto", clase: "opt-dnt" },
                 { texto: "📊 Coberturas 2026", siguiente: "rama_hcm" },
                 { texto: "📝 Trámites", siguiente: "rama_tramites" }
             ]
+        },
+        rama_aliados: {
+            texto: "<b>Red de Aliados a Nivel Nacional:</b>\nPor favor, selecciona tu ubicación para mostrarte los centros médicos disponibles.",
+            tipo: "aliados_form"
         },
         rama_ven: {
             texto: "<b>Venemergencia (24/7):</b>\n• Telemedicina\n• Atención Domiciliaria\n• Ambulancia\n• Medicinas Agudas.",
@@ -180,6 +208,7 @@
         div.innerHTML = texto.replace("[nombre]", `<strong>${nombreUsuario}</strong>`);
         chatWindow.appendChild(div);
         chatWindow.scrollTop = chatWindow.scrollHeight;
+        return div;
     }
 
     function mostrarOpciones(paso) {
@@ -187,6 +216,7 @@
         inputArea.style.display = "none";
         const datos = botTree[paso];
         mostrarMensaje(datos.texto, 'bot');
+
         if (datos.tipo === "nombre") {
             inputArea.style.display = "flex";
             userNameInput.focus();
@@ -198,6 +228,8 @@
                     setTimeout(() => mostrarOpciones('menu_principal'), 500);
                 }
             };
+        } else if (datos.tipo === "aliados_form") {
+            generarMenuAliados();
         } else if (datos.opciones) {
             datos.opciones.forEach(opt => {
                 const b = document.createElement('button');
@@ -214,6 +246,70 @@
                 optionsContainer.appendChild(b);
             });
         }
+    }
+
+    function generarMenuAliados() {
+        const form = document.createElement('div');
+        form.className = 'aliados-form';
+
+        const estados = [...new Set(aliadosData.map(a => a.estado))].sort();
+        
+        const selEstado = document.createElement('select');
+        selEstado.className = 'aliados-select';
+        selEstado.innerHTML = '<option value="">Selecciona Estado...</option>' + 
+            estados.map(e => `<option value="${e}">${e}</option>`).join('');
+
+        const selCiudad = document.createElement('select');
+        selCiudad.className = 'aliados-select';
+        selCiudad.innerHTML = '<option value="">Selecciona Ciudad...</option>';
+
+        selEstado.onchange = () => {
+            const ciudades = [...new Set(aliadosData.filter(a => a.estado === selEstado.value).map(a => a.ciudad))].sort();
+            selCiudad.innerHTML = '<option value="">Selecciona Ciudad...</option>' + 
+                ciudades.map(c => `<option value="${c}">${c}</option>`).join('');
+        };
+
+        const btnBuscar = document.createElement('button');
+        btnBuscar.className = 'aliados-btn-search';
+        btnBuscar.innerText = "🔍 BUSCAR ALIADOS";
+        btnBuscar.onclick = () => {
+            const res = aliadosData.filter(a => a.estado === selEstado.value && a.ciudad === selCiudad.value);
+            if(res.length > 0) {
+                mostrarMensaje(`He encontrado ${res.length} aliados en ${selCiudad.value}:`, 'bot');
+                res.forEach(aliado => {
+                    const card = `
+                        <div class="aliado-card">
+                            <h4>${aliado.nombre}</h4>
+                            <p>${aliado.direccion}</p>
+                            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(aliado.mapa || aliado.nombre + ' ' + aliado.direccion)}" target="_blank">📍 Ver en Mapa</a>
+                        </div>`;
+                    mostrarMensaje(card, 'bot');
+                });
+            } else {
+                mostrarMensaje("No encontré aliados para esa selección.", 'bot');
+            }
+            
+            // Re-mostrar botón de volver
+            const bVolver = document.createElement('button');
+            bVolver.className = 'opt-btn';
+            bVolver.innerText = "⬅️ Volver al Menú";
+            bVolver.onclick = () => mostrarOpciones('menu_principal');
+            optionsContainer.innerHTML = "";
+            optionsContainer.appendChild(bVolver);
+        };
+
+        form.appendChild(selEstado);
+        form.appendChild(selCiudad);
+        form.appendChild(btnBuscar);
+        chatWindow.appendChild(form);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+
+        // Botón volver en la barra de opciones
+        const bV = document.createElement('button');
+        bV.className = 'opt-btn';
+        bV.innerText = "⬅️ Volver";
+        bV.onclick = () => mostrarOpciones('menu_principal');
+        optionsContainer.appendChild(bV);
     }
 
     function ejecutarAccion(accion) {
@@ -233,7 +329,6 @@
         if (accion === "descargar_reembolso") window.open('documentos/planilla-reembolso.pdf', '_blank');
     }
 
-    // REGISTRO TÉCNICO PARA INSTALACIÓN (Obligatorio para que salga el botón)
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('data:application/javascript;base64,c2VsZi5hZGRFdmVudExpc3RlbmVyKCdmZXRjaCcsIGU9Pnt9KTs=');
     }
